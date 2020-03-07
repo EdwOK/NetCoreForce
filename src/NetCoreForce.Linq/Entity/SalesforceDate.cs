@@ -6,43 +6,41 @@ namespace NetCoreForce.Linq.Entity
     {
         public SalesforceDate(DateTime time)
         {
-            this.year = time.Year;
-            this.month = time.Month;
-            this.day = time.Day;
-        }
-        public SalesforceDate(int year, int month, int day)
-        {
-            this.year = year;
-            this.month = month;
-            this.day = day;
+            this.Year = time.Year;
+            this.Month = time.Month;
+            this.Day = time.Day;
         }
 
-        private int year;
-        public int Year { get { return year; } }
-        private int month;
-        public int Month { get { return month; } }
-        private int day;
-        public int Day { get { return day; } }
-        public static SalesforceDate Now
+        public SalesforceDate(int year, int month, int day)
         {
-            get
-            {
-                return new SalesforceDate(DateTime.Now);
-            }
+            this.Year = year;
+            this.Month = month;
+            this.Day = day;
         }
+
+        public int Year { get; }
+
+        public int Month { get; }
+
+        public int Day { get; }
+
+        public static SalesforceDate Now => new SalesforceDate(DateTime.Now);
 
         public static bool operator ==(DateTime? d1, SalesforceDate d2)
         {
             return false;
         }
+
         public static bool operator !=(DateTime? d1, SalesforceDate d2)
         {
             return false;
         }
+
         public static bool operator >=(DateTime? d1, SalesforceDate d2)
         {
             return false;
         }
+
         public static bool operator <=(DateTime? d1, SalesforceDate d2)
         {
             return false;
@@ -51,6 +49,7 @@ namespace NetCoreForce.Linq.Entity
         {
             return false;
         }
+
         public static bool operator <(DateTime d1, SalesforceDate d2)
         {
             return false;
@@ -67,6 +66,7 @@ namespace NetCoreForce.Linq.Entity
         {
             return false;
         }
+
         public static bool operator <=(DateTime d1, SalesforceDate d2)
         {
             return false;
@@ -76,14 +76,17 @@ namespace NetCoreForce.Linq.Entity
         {
             return base.GetHashCode();
         }
+
         public override bool Equals(object obj)
         {
             return base.Equals(obj);
         }
+
         public override string ToString()
         {
-            return string.Format("{0}-{1}-{2}", Year, Month.ToString().PadLeft(2, '0'), Day.ToString().PadLeft(2, '0'));
+            return $"{Year}-{Month.ToString().PadLeft(2, '0')}-{Day.ToString().PadLeft(2, '0')}";
         }
+
         public DateTime ToDateTime()
         {
             return new DateTime(Year, Month, Day);

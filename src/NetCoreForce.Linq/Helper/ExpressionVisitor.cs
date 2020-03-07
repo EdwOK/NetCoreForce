@@ -88,7 +88,7 @@ namespace NetCoreForce.Linq.Helper
 
         protected virtual Expression VisitUnknown(Expression expression)
         {
-            throw new Exception(string.Format("Unhandled expression type: '{0}'", expression.NodeType));
+            throw new Exception($"Unhandled expression type: '{expression.NodeType}'");
         }
 
         protected virtual MemberBinding VisitBinding(MemberBinding binding)
@@ -102,18 +102,14 @@ namespace NetCoreForce.Linq.Helper
                 case MemberBindingType.ListBinding:
                     return this.VisitMemberListBinding((MemberListBinding)binding);
                 default:
-                    throw new Exception(string.Format("Unhandled binding type '{0}'", binding.BindingType));
+                    throw new Exception($"Unhandled binding type '{binding.BindingType}'");
             }
         }
 
         protected virtual ElementInit VisitElementInitializer(ElementInit initializer)
         {
             ReadOnlyCollection<Expression> arguments = this.VisitExpressionList(initializer.Arguments);
-            if (arguments != initializer.Arguments)
-            {
-                return Expression.ElementInit(initializer.AddMethod, arguments);
-            }
-            return initializer;
+            return arguments != initializer.Arguments ? Expression.ElementInit(initializer.AddMethod, arguments) : initializer;
         }
 
         protected virtual Expression VisitUnary(UnaryExpression u)
@@ -265,7 +261,7 @@ namespace NetCoreForce.Linq.Helper
                 List<Expression> list = null;
                 for (int i = 0, n = original.Count; i < n; i++)
                 {
-                    Expression p = this.VisitMemberAndExpression(members != null ? members[i] : null, original[i]);
+                    Expression p = this.VisitMemberAndExpression(members?[i], original[i]);
                     if (list != null)
                     {
                         list.Add(p);

@@ -13,22 +13,25 @@ namespace NetCoreForce.Linq.Tests
 
         #region Overrides of SalesforceProviderBase<T>
 
-        public QueryTranslateSalesforceProvider(ISalesforceNamingConvention namingConvention, SelectTypeEnum selectType = SelectTypeEnum.SelectIdAndUseAttachModel) : base(namingConvention, selectType)
+        public QueryTranslateSalesforceProvider(
+            ISalesforceNamingConvention namingConvention, 
+            SelectTypeEnum selectType = SelectTypeEnum.SelectIdAndUseAttachModel) 
+            : base(namingConvention, selectType)
         {
         }
 
-        protected override ValueTask<int> ProduceCountAsync(string cmd)
+        protected override Task<int> ProduceCountAsync(string cmd)
         {
             SOQLCalled = cmd;
 
             return base.ProduceCountAsync(cmd);
         }
 
-        protected override IAsyncEnumerator<T> ProduceAsyncEnumerator(string cmd, CancellationToken token)
+        protected override IAsyncEnumerator<T> ProduceAsyncEnumerator(string cmd)
         {
             SOQLCalled = cmd;
 
-            return base.ProduceAsyncEnumerator(cmd, token);
+            return base.ProduceAsyncEnumerator(cmd);
         }
         #endregion
     }

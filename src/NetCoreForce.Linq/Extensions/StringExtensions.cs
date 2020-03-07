@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 
-namespace NetCoreForce.Linq.Extensions
+namespace System
 {
-    public static class StringExtensions
+    public static class NetCoreForceStringExtensions
     {
         public static bool Includes(this string str, string include)
         {

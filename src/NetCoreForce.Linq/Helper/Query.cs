@@ -13,7 +13,7 @@ namespace NetCoreForce.Linq.Helper
     /// <summary>
     /// A default implementation of IQueryable for use with QueryProvider
     /// </summary>
-    public class Query<T> : IOrderedAsyncQueryable<T>
+    public class Query<T> : IAsyncQueryable<T>, IOrderedAsyncQueryable<T>
     {
         public Query(IAsyncQueryProvider provider)
             : this(provider, (Type)null)
@@ -53,9 +53,15 @@ namespace NetCoreForce.Linq.Helper
 
         public IAsyncQueryProvider Provider { get; }
 
-        public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = new CancellationToken())
+#if NETSTANDARD2_1
+        public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken token)
         {
-            return Provider.ExecuteAsync<IAsyncEnumerator<T>>(Expression, cancellationToken).GetAwaiter().GetResult();
+            return Provider.ExecuteAsync<IAsyncEnumerator<T>>(Expression, token).GetAwaiter().GetResult();
+        }
+#endif
+        public IAsyncEnumerator<T> GetEnumerator()
+        {
+            return Provider.ExecuteAsync<IAsyncEnumerator<T>>(Expression, CancellationToken.None).GetAwaiter().GetResult();
         }
 
         public override string ToString()

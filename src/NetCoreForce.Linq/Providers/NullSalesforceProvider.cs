@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using NetCoreForce.Linq.Conventions.Naming;
 using NetCoreForce.Linq.Entity;
@@ -11,19 +10,27 @@ namespace NetCoreForce.Linq.Providers
     {
         #region Overrides of SalesforceProviderBase<T>
 
-        public NullSalesforceProvider(ISalesforceNamingConvention namingConvention, SelectTypeEnum selectType = SelectTypeEnum.SelectIdAndUseAttachModel) : base(namingConvention, selectType)
+        public NullSalesforceProvider(
+            ISalesforceNamingConvention namingConvention, 
+            SelectTypeEnum selectType = SelectTypeEnum.SelectIdAndUseAttachModel) 
+            : base(namingConvention, selectType)
         {
         }
 
-        protected override ValueTask<int> ProduceCountAsync(string cmd)
+        protected override Task<int> ProduceCountAsync(string cmd)
         {
-            return new ValueTask<int>();
+            return Task.FromResult(0);
         }
 
-        protected override IAsyncEnumerator<T> ProduceAsyncEnumerator(string cmd, CancellationToken token)
+        protected override IAsyncEnumerator<T> ProduceAsyncEnumerator(string cmd)
         {
-            return AsyncEnumerable.Empty<T>().GetAsyncEnumerator(token);
+#if NETSTANDARD2_1
+            return AsyncEnumerable.Empty<T>().GetAsyncEnumerator();
+#else
+            return AsyncEnumerable.Empty<T>().GetEnumerator();
+#endif
         }
+
         #endregion
     }
 }

@@ -215,7 +215,11 @@ namespace NetCoreForce.Client
         /// <returns><see cref="IAsyncEnumerable{T}"/> of results</returns>
         public IAsyncEnumerable<T> QueryAsync<T>(string queryString, bool queryAll = false, int? batchSize = null)
         {
-            return AsyncEnumerable.Create(token => QueryAsyncEnumerator<T>(queryString, queryAll, batchSize, token));
+#if NETSTANDARD2_1
+            return AsyncEnumerable.Create((token) => QueryAsyncEnumerator<T>(queryString, queryAll, batchSize));
+#else
+            return AsyncEnumerable.CreateEnumerable(() => QueryAsyncEnumerator<T>(queryString, queryAll, batchSize));
+#endif
         }
 
         /// <summary>
@@ -225,10 +229,8 @@ namespace NetCoreForce.Client
         /// <param name="queryString">SOQL query string, without any URL escaping/encoding</param>
         /// <param name="queryAll">Optional. True if deleted records are to be included.await Defaults to false.</param>
         /// <param name="batchSize">Optional. Size of result batches between 200 and 2000</param>
-        /// <param name="token">Cancellation token to reject</param>
         /// <returns><see cref="IAsyncEnumerator{T}"/> of results</returns>
-        public IAsyncEnumerator<T> QueryAsyncEnumerator<T>(string queryString, bool queryAll = false, int? batchSize = null, 
-            CancellationToken token = default)
+        public IAsyncEnumerator<T> QueryAsyncEnumerator<T>(string queryString, bool queryAll = false, int? batchSize = null)
         {
             var headers = new Dictionary<string, string>();
 
@@ -250,15 +252,19 @@ namespace NetCoreForce.Client
             var done = false;
             var nextRecordsUri = UriFormatter.Query(InstanceUrl, ApiVersion, queryString, queryAll);
 
+#if NETSTANDARD2_1
             return AsyncEnumerator.Create(MoveNextAsync, Current, Dispose);
-
             async ValueTask<bool> MoveNextAsync()
+            {
+#else
+            return AsyncEnumerable.CreateEnumerator(MoveNextAsync, Current, Dispose);
+            async Task<bool> MoveNextAsync(CancellationToken token)
             {
                 if (token.IsCancellationRequested)
                 {
                     return false;
                 }
-
+#endif
                 // If items remain in the current Batch enumerator, go to next item
                 if (currentBatchEnumerator?.MoveNext() == true)
                 {
@@ -301,12 +307,20 @@ namespace NetCoreForce.Client
                 return currentBatchEnumerator == null ? default : currentBatchEnumerator.Current;
             }
 
+#if NETSTANDARD2_1
             ValueTask Dispose()
             {
                 currentBatchEnumerator?.Dispose();
                 jsonClient.Dispose();
-                return default;
+                return new ValueTask();
             }
+#else
+            void Dispose()
+            {
+                currentBatchEnumerator?.Dispose();
+                jsonClient.Dispose();
+            }
+#endif
         }
 
         /// <summary>
@@ -316,7 +330,7 @@ namespace NetCoreForce.Client
         /// <param name="queryString">SOQL query string starting with SELECT COUNT() FROM</param>
         /// <param name="queryAll">True if deleted records are to be included</param>
         /// <returns>The <see cref="Task{Int}"/> returning the count</returns>
-        public async ValueTask<int> CountQuery(string queryString, bool queryAll = false)
+        public async Task<int> CountQuery(string queryString, bool queryAll = false)
         {
             // https://developer.salesforce.com/docs/atlas.en-us.soql_sosl.meta/soql_sosl/sforce_api_calls_soql_select_count.htm
             // COUNT() must be the only element in the SELECT list.
@@ -482,6 +496,39 @@ namespace NetCoreForce.Client
         }
 
         /// <summary>
+        /// Updates
+        /// </summary>
+        /// <param name="sfObjects">Objects to update</param>
+        /// <param name="allOrNone">Rollback if all updates were not successful</param>
+        /// <param name="customHeaders">Custom headers to include in request (Optional). await The HeaderFormatter helper class can be used to generate the custom header as needed.</param>
+        /// <returns>List of UpdateMultipleResponse objects, includes response for each object (id, success, errors)</returns>
+        /// <exception cref="ArgumentException">Thrown when missing required information</exception>
+        /// <exception cref="ForceApiException">Thrown when update fails</exception>
+        public async Task<List<UpdateMultipleResponse>> UpdateRecords(List<object> sfObjects, bool allOrNone = false, Dictionary<string, string> customHeaders = null)
+        {
+            Dictionary<string, string> headers = new Dictionary<string, string>();
+
+            //Add call options
+            Dictionary<string, string> callOptions = HeaderFormatter.SforceCallOptions(ClientName);
+            headers.AddRange(callOptions);
+
+            //Add custom headers if specified
+            if (customHeaders != null)
+            {
+                headers.AddRange(customHeaders);
+            }
+
+            var uri = UriFormatter.SObjectsComposite(InstanceUrl, ApiVersion);
+
+            JsonClient client = new JsonClient(AccessToken, _httpClient);
+
+            UpdateMultipleRequest updateMultipleRequest = new UpdateMultipleRequest(sfObjects, allOrNone);
+
+            return await client.HttpPatchAsync<List<UpdateMultipleResponse>>(updateMultipleRequest, uri, headers, true, true);
+            
+        }
+
+        /// <summary>
         /// Inserts or Updates a records based on external id
         /// </summary>
         /// <param name="sObjectTypeName">SObject name, e.g. "Account"</param>
@@ -529,7 +576,7 @@ namespace NetCoreForce.Client
             await client.HttpDeleteAsync<object>(uri, headers);
         }
 
-        #region metadata
+#region metadata
 
         /// <summary>
         /// Lists information about limits in your org.
