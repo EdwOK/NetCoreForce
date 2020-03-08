@@ -15,7 +15,7 @@ namespace NetCoreForce.Client.Tests
         public async Task QueryAsyncInvalidBatchSize()
         {
             HttpClient httpClient = new HttpClient(new MockHttpClientHandler());
-            ForceClient client = new ForceClient("https://na15.salesforce.com", "v41.0", "dummyToken", httpClient);
+            ForceClient client = new ForceClient(httpClient).Initialize("https://na15.salesforce.com", "v41.0", "dummyToken");
 
             var contactsEnumerable = client.QueryAsync<SfContact>("SELECT Id FROM Contact LIMIT 1000", batchSize: 100);
 
@@ -57,7 +57,7 @@ namespace NetCoreForce.Client.Tests
 
             HttpClient httpClient = new HttpClient(mockHandler);
 
-            ForceClient client = new ForceClient("https://na15.salesforce.com", "v41.0", "dummyToken", httpClient);
+            ForceClient client = new ForceClient(httpClient).Initialize("https://na15.salesforce.com", "v41.0", "dummyToken");
 
             var contactsEnumerable = client.QueryAsync<SfContact>("SELECT Id FROM Contact LIMIT 800", batchSize: 200);
 

@@ -1,20 +1,16 @@
 using System;
 using System.Collections.Generic;
 
-namespace NetCoreForce.Client
+namespace NetCoreForce.Client.Extensions
 {
-    public static class ExtensionMethods
+    internal static class CommonExtenions
     {
         /// <summary>
         /// Convert DateTimeOffset to a Salesforce-compatible string
         /// </summary>
         public static string ToSfDateString(this DateTimeOffset value)
         {
-            if (value != null)
-            {
-                return value.ToString("yyyy-MM-ddTHH:mm:sszzz");
-            }
-            return null;
+            return value.ToString("yyyy-MM-ddTHH:mm:sszzz");
         }
 
         /// <summary>
@@ -51,7 +47,9 @@ namespace NetCoreForce.Client
         public static void AddRange<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, Dictionary<TKey, TValue> range)
         {
             foreach (var key in range.Keys)
-            { dictionary.Add(key, range[key]); }
+            {
+                dictionary.Add(key, range[key]);
+            }
         }
     }
 }

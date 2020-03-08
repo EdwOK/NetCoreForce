@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using NetCoreForce.Client.Extensions;
 using NetCoreForce.Client.Models;
 
 namespace NetCoreForce.Client
@@ -22,16 +23,22 @@ namespace NetCoreForce.Client
         /// </summary>
         public AccessTokenResponse AccessInfo { get; set; }
 
-        private HttpClient _httpClient;
+        private readonly HttpClient _httpClient;
+
+        public ForceClient(HttpClient httpClient)
+        {
+            _httpClient = httpClient;
+        }
 
         /// <summary>
         /// Login to Salesforce using the username-password authentication flow, and initialize the client
         /// </summary>
         /// <param name="authInfo"></param>
-        public ForceClient(AuthInfo authInfo)
-            : this(authInfo.ClientId, authInfo.ClientSecret, authInfo.Username, authInfo.Password,
-                authInfo.TokenRequestEndpoint, authInfo.ApiVersion)
+        public async Task<ForceClient> Initialize(AuthInfo authInfo)
         {
+            await Initialize(authInfo.ClientId, authInfo.ClientSecret, authInfo.Username, authInfo.Password,
+                authInfo.TokenRequestEndpoint, authInfo.ApiVersion);
+            return this;
         }
 
         /// <summary>
@@ -43,12 +50,13 @@ namespace NetCoreForce.Client
         /// <param name="password">Salesforce password</param>
         /// <param name="tokenRequestEndpoint">Token request endpoint <para>e.g. https://login.salesforce.com/services/oauth2/token</para></param>
         /// <param name="apiVersion">Salesforce API version</param>
-        /// <param name="httpClient">Optional HttpClient object. Defaults to a shared static instance for best performance, but a custom HttpClient can be specified when custom properties are needed e.g. proxy settings.</param>
-        public ForceClient(string clientId, string clientSecret, string username, string password, string tokenRequestEndpoint, string apiVersion = null, HttpClient httpClient = null)
+        public async Task<ForceClient> Initialize(string clientId, string clientSecret, string username, string password,
+            string tokenRequestEndpoint, string apiVersion = null)
         {
             try
             {
-                Login(clientId, clientSecret, username, password, tokenRequestEndpoint, apiVersion, httpClient).Wait();
+                await Login(clientId, clientSecret, username, password, tokenRequestEndpoint, apiVersion);
+                return this;
             }
             catch (AggregateException ax)
             {
@@ -62,29 +70,28 @@ namespace NetCoreForce.Client
         /// <param name="instanceUrl">Identifies the Salesforce instance to which API calls should be sent.</param>
         /// <param name="apiVersion">Salesforce API version</param>
         /// <param name="accessToken">Access token</param>
-        /// <param name="httpClient">Optional HttpClient object. Defaults to a shared static instance for best performance, but a custom HttpClient can be specified when custom properties are needed e.g. proxy settings.</param>
         /// <param name="accessInfo">AccessTokenResponse object, to store all of the OAuth details received via the AuthenticationClient</param>
-        public ForceClient(string instanceUrl, string apiVersion, string accessToken, HttpClient httpClient = null, AccessTokenResponse accessInfo = null)
-        {
-            Initialize(instanceUrl, apiVersion, accessToken, httpClient, accessInfo);
-        }
-
-        private async Task Login(string clientId, string clientSecret, string username, string password, string tokenRequestEndpoint, string apiVersion = null, HttpClient httpClient = null)
-        {
-            var authClient = new AuthenticationClient(apiVersion);
-            await authClient.UsernamePasswordAsync(clientId, clientSecret, username, password, tokenRequestEndpoint);
-
-            Initialize(authClient.AccessInfo.InstanceUrl, authClient.ApiVersion, authClient.AccessInfo.AccessToken, httpClient, authClient.AccessInfo);
-        }
-
-        private void Initialize(string instanceUrl, string apiVersion, string accessToken, HttpClient httpClient = null, AccessTokenResponse accessInfo = null)
+        public ForceClient Initialize(string instanceUrl, string apiVersion, string accessToken, AccessTokenResponse accessInfo = null)
         {
             this.ApiVersion = apiVersion;
             this.InstanceUrl = instanceUrl;
             this.AccessToken = accessToken;
             this.AccessInfo = accessInfo;
 
-            _httpClient = httpClient;
+            return this;
+        }
+
+        private async Task Login(string clientId, string clientSecret, string username, string password,
+            string tokenRequestEndpoint, string apiVersion = null)
+        {
+            var authClient = new AuthenticationClient(_httpClient)
+            {
+                ApiVersion = apiVersion
+            };
+
+            await authClient.UsernamePasswordAsync(clientId, clientSecret, username, password, tokenRequestEndpoint);
+
+            Initialize(authClient.AccessInfo.InstanceUrl, authClient.ApiVersion, authClient.AccessInfo.AccessToken, authClient.AccessInfo);
         }
 
         /// <summary>
@@ -105,7 +112,9 @@ namespace NetCoreForce.Client
             }
             catch (Exception ex)
             {
+#if DEBUG
                 Debug.WriteLine("TestConnection() failed with exception: " + ex.Message);
+#endif
                 return false;
             }
         }
@@ -176,7 +185,9 @@ namespace NetCoreForce.Client
             }
             catch (Exception ex)
             {
+#if DEBUG
                 Debug.WriteLine("Error querying: " + ex.Message);
+#endif
                 throw ex;
             }
         }
@@ -202,7 +213,7 @@ namespace NetCoreForce.Client
                 return results[0];
             }
 
-            return default(T);
+            return default;
         }
 
         /// <summary>
@@ -295,7 +306,7 @@ namespace NetCoreForce.Client
                 else
                 {
                     //Normally if query has remaining batches, NextRecordsUrl will have a value, and Done will be false.
-                    //In case of some unforseen error, flag the result as done if we're missing the NextRecordsURL
+                    //In case of some unforeseen error, flag the result as done if we're missing the NextRecordsURL
                     done = true;
                 }
 
@@ -311,14 +322,12 @@ namespace NetCoreForce.Client
             ValueTask Dispose()
             {
                 currentBatchEnumerator?.Dispose();
-                jsonClient.Dispose();
                 return new ValueTask();
             }
 #else
             void Dispose()
             {
                 currentBatchEnumerator?.Dispose();
-                jsonClient.Dispose();
             }
 #endif
         }

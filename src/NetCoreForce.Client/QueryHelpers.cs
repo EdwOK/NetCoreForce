@@ -13,7 +13,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Encodings.Web;
-// using Microsoft.Extensions.Primitives;
 
 namespace NetCoreForce.Client
 {
@@ -109,93 +108,5 @@ namespace NetCoreForce.Client
             sb.Append(anchorText);
             return sb.ToString();
         }
-
-        /*
-        /// <summary>
-        /// Parse a query string into its component key and value parts.
-        /// </summary>
-        /// <param name="queryString">The raw query string value, with or without the leading '?'.</param>
-        /// <returns>A collection of parsed keys and values.</returns>
-        public static Dictionary<string, StringValues> ParseQuery(string queryString)
-        {
-            var result = ParseNullableQuery(queryString);
-
-            if (result == null)
-            {
-                return new Dictionary<string, StringValues>();
-            }
-
-            return result;
-        }
-
-
-        /// <summary>
-        /// Parse a query string into its component key and value parts.
-        /// </summary>
-        /// <param name="queryString">The raw query string value, with or without the leading '?'.</param>
-        /// <returns>A collection of parsed keys and values, null if there are no entries.</returns>
-        public static Dictionary<string, StringValues> ParseNullableQuery(string queryString)
-        {
-            var accumulator = new KeyValueAccumulator();
-
-            if (string.IsNullOrEmpty(queryString) || queryString == "?")
-            {
-                return null;
-            }
-
-            int scanIndex = 0;
-            if (queryString[0] == '?')
-            {
-                scanIndex = 1;
-            }
-
-            int textLength = queryString.Length;
-            int equalIndex = queryString.IndexOf('=');
-            if (equalIndex == -1)
-            {
-                equalIndex = textLength;
-            }
-            while (scanIndex < textLength)
-            {
-                int delimiterIndex = queryString.IndexOf('&', scanIndex);
-                if (delimiterIndex == -1)
-                {
-                    delimiterIndex = textLength;
-                }
-                if (equalIndex < delimiterIndex)
-                {
-                    while (scanIndex != equalIndex && char.IsWhiteSpace(queryString[scanIndex]))
-                    {
-                        ++scanIndex;
-                    }
-                    string name = queryString.Substring(scanIndex, equalIndex - scanIndex);
-                    string value = queryString.Substring(equalIndex + 1, delimiterIndex - equalIndex - 1);
-                    accumulator.Append(
-                        Uri.UnescapeDataString(name.Replace('+', ' ')),
-                        Uri.UnescapeDataString(value.Replace('+', ' ')));
-                    equalIndex = queryString.IndexOf('=', delimiterIndex);
-                    if (equalIndex == -1)
-                    {
-                        equalIndex = textLength;
-                    }
-                }
-                else
-                {
-                    if (delimiterIndex > scanIndex)
-                    {
-                        accumulator.Append(queryString.Substring(scanIndex, delimiterIndex - scanIndex), string.Empty);
-                    }
-                }
-                scanIndex = delimiterIndex + 1;
-            }
-
-            if (!accumulator.HasValues)
-            {
-                return null;
-            }
-
-            return accumulator.GetResults();
-        }
-        */
     }
 }

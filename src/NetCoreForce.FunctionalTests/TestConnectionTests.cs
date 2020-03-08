@@ -1,47 +1,51 @@
-using System;
 using Xunit;
 using NetCoreForce.Client;
 using NetCoreForce.Client.Models;
 using System.Diagnostics;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Xunit.Abstractions;
 
 namespace NetCoreForce.FunctionalTests
 {
     public class TestConnectionTests : IClassFixture<ForceClientFixture>
     {
-        ForceClientFixture forceClientFixture;
+        private readonly ForceClientFixture _forceClientFixture;
+        private readonly ITestOutputHelper _testOutputHelper;
 
-        public TestConnectionTests(ForceClientFixture fixture)
+        public TestConnectionTests(ForceClientFixture fixture, ITestOutputHelper testOutputHelper)
         {
-            this.forceClientFixture = fixture;
+            this._forceClientFixture = fixture;
+            _testOutputHelper = testOutputHelper;
         }
 
         [Fact]
-        public void TestConnectionBadUrl()
+        public async Task TestConnectionBadUrl()
         {
-            AuthInfo authInfo = forceClientFixture.AuthInfo;
-            ForceClient client = new ForceClient(authInfo);
+            AuthInfo authInfo = _forceClientFixture.AuthInfo;
+            ForceClient client = await new ForceClient(new HttpClient()).Initialize(authInfo);
 
             Assert.False(client.TestConnection("https://badurl"));
             Assert.False(client.TestConnection("malformedurl"));
         }
 
         [Fact]
-        public void TestConnection()
+        public async Task TestConnection()
         {
-            AuthInfo authInfo = forceClientFixture.AuthInfo;
-            ForceClient client = new ForceClient(authInfo);
+            AuthInfo authInfo = _forceClientFixture.AuthInfo;
+            ForceClient client = await new ForceClient(new HttpClient()).Initialize(authInfo);
 
             Stopwatch sw = new Stopwatch();
             Assert.True(client.TestConnection());
             sw.Stop();
-            Console.WriteLine($"TestConnection() took {sw.ElapsedMilliseconds.ToString()}ms");
+            _testOutputHelper.WriteLine($"TestConnection() took {sw.ElapsedMilliseconds.ToString()}ms");
         }
 
         [Fact]
-        public void TestConnectionToNa1()
+        public async Task TestConnectionToNa1()
         {
-            AuthInfo authInfo = forceClientFixture.AuthInfo;
-            ForceClient client = new ForceClient(authInfo);
+            AuthInfo authInfo = _forceClientFixture.AuthInfo;
+            ForceClient client = await new ForceClient(new HttpClient()).Initialize(authInfo);
 
             //Barring any major server reorg in Salesforce, the NA1 production instance should always be there.
             //If this test fails, verify that the NA1 instance still exists.

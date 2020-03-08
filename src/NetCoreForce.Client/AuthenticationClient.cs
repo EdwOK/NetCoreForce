@@ -9,7 +9,7 @@ using NetCoreForce.Client.Models;
 
 namespace NetCoreForce.Client
 {
-    public class AuthenticationClient : IDisposable
+    public class AuthenticationClient
     {
         private const string DefaultApiVersion = "v44.0";
         private const string UserAgent = "netcoreforce-client";
@@ -17,7 +17,7 @@ namespace NetCoreForce.Client
 
         private readonly HttpClient _httpClient;
 
-        public string ApiVersion { get; set; }
+        public string ApiVersion { get; set; } = DefaultApiVersion;
 
         /// <summary>
         /// The access token response from a successful authentication.
@@ -27,21 +27,11 @@ namespace NetCoreForce.Client
 
         /// <summary>
         /// Initialize the AuthenticationClient with the library's default Salesforce API version
-        /// <para>See the DefaultApiVersion property</para>
+        /// <para>See the ApiVersion property</para>
         /// </summary>
-        public AuthenticationClient() : this(null)
+        public AuthenticationClient(HttpClient httpClient)
         {
-        }
-
-        /// <summary>
-        /// Initialize the AuthenticationClient with the specified Salesforce API version
-        /// </summary>
-        /// <param name="apiVersion">Target Salesforce API version</param>
-        public AuthenticationClient(string apiVersion)
-        {
-            ApiVersion = !string.IsNullOrEmpty(apiVersion) ? apiVersion : DefaultApiVersion;
-
-            _httpClient = new HttpClient();
+            _httpClient = httpClient;
         }
 
         /// <summary>
@@ -72,13 +62,12 @@ namespace NetCoreForce.Client
         {
             try
             {
-                var task = UsernamePasswordAsync(clientId, clientSecret, username, password, tokenRequestEndpointUrl);
-                task.Wait();
+                UsernamePasswordAsync(clientId, clientSecret, username, password, tokenRequestEndpointUrl).Wait();
             }
             catch (AggregateException ex)
             {
                 // Will typically be a single ForceAuthException exception - unwrap and throw
-                if (ex.InnerException != null && ex.InnerExceptions != null && ex.InnerExceptions.Count == 1)
+                if (ex.InnerException != null && ex.InnerExceptions.Count == 1)
                 {
                     throw ex.InnerException;
                 }
@@ -262,11 +251,6 @@ namespace NetCoreForce.Client
                 var errorResponse = JsonConvert.DeserializeObject<AuthErrorResponse>(response);
                 throw new ForceAuthException(errorResponse.Error, errorResponse.ErrorDescription, responseMessage.StatusCode);
             }
-        }
-
-        public void Dispose()
-        {
-            _httpClient.Dispose();
         }
     }
 }

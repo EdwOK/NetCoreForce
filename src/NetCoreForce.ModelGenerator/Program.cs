@@ -4,6 +4,7 @@ using System.Reflection;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using McMaster.Extensions.CommandLineUtils;
@@ -334,7 +335,7 @@ namespace NetCoreForce.ModelGenerator
         private static async Task<ForceClient> Login(GenConfig config)
         {
 
-            AuthenticationClient auth = new AuthenticationClient();
+            AuthenticationClient auth = new AuthenticationClient(new HttpClient());
             try
             {
                 await auth.UsernamePasswordAsync(config.AuthInfo.ClientId, config.AuthInfo.ClientSecret,
@@ -348,7 +349,7 @@ namespace NetCoreForce.ModelGenerator
                 throw ex;
             }
 
-            ForceClient client = new ForceClient(auth.AccessInfo.InstanceUrl, auth.ApiVersion, auth.AccessInfo.AccessToken);
+            ForceClient client = new ForceClient(new HttpClient()).Initialize(auth.AccessInfo.InstanceUrl, auth.ApiVersion, auth.AccessInfo.AccessToken);
 
             return client;
         }

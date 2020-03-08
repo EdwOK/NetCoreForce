@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
 using NetCoreForce.Client;
@@ -19,7 +20,7 @@ namespace NetCoreForce.FunctionalTests
         public async Task GetApiVersions()
         {
             AuthInfo authInfo = forceClientFixture.AuthInfo;            
-            ForceClient client = new ForceClient(authInfo);
+            ForceClient client = await new ForceClient(new HttpClient()).Initialize(authInfo);
 
             List<SalesforceVersion> versions = await client.GetAvailableRestApiVersions();
 
@@ -37,7 +38,7 @@ namespace NetCoreForce.FunctionalTests
         public async Task GetApiVersionsCustomUrl()
         {
             AuthInfo authInfo = forceClientFixture.AuthInfo;            
-            ForceClient client = new ForceClient(authInfo);
+            ForceClient client = await new ForceClient(new HttpClient()).Initialize(authInfo);
 
             List<SalesforceVersion> versions = await client.GetAvailableRestApiVersions(client.InstanceUrl);
 
@@ -55,7 +56,7 @@ namespace NetCoreForce.FunctionalTests
         public async Task GetApiVersionsBadUrl()
         {
             AuthInfo authInfo = forceClientFixture.AuthInfo;
-            ForceClient client = new ForceClient(authInfo);
+            ForceClient client = await new ForceClient(new HttpClient()).Initialize(authInfo);
 
             await Assert.ThrowsAsync<ForceApiException>(
                 async () => await client.GetAvailableRestApiVersions("https://badurl")

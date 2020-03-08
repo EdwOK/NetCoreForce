@@ -2,33 +2,36 @@ using System;
 using System.Net;
 using System.Net.Http;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace NetCoreForce.Client.Tests
 {
     public class MockHttpClientHandler : DelegatingHandler
     {
-        private readonly Dictionary<Uri, HttpResponseMessage> _MockResponses = new Dictionary<Uri, HttpResponseMessage>();
+        private readonly Dictionary<Uri, HttpResponseMessage> _mockResponses = new Dictionary<Uri, HttpResponseMessage>();
 
         public void AddMockResponse(Uri uri, HttpResponseMessage responseMessage)
         {
-            _MockResponses.Add(uri, responseMessage);
+            _mockResponses.Add(uri, responseMessage);
         }
 
         public void AddMockResponse(Uri uri, HttpStatusCode statusCode, string responseContent)
         {
-            HttpResponseMessage responseMessage = new HttpResponseMessage(statusCode);
-            responseMessage.Content = new StringContent(responseContent);
-            
-            _MockResponses.Add(uri, responseMessage);
+            var responseMessage = new HttpResponseMessage(statusCode)
+            {
+                Content = new StringContent(responseContent)
+            };
+
+            _mockResponses.Add(uri, responseMessage);
         }
 
-        protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            if (_MockResponses.ContainsKey(request.RequestUri))
+            if (_mockResponses.ContainsKey(request.RequestUri))
             {
                 //return _MockResponses[request.RequestUri];
-                return await Task.FromResult(_MockResponses[request.RequestUri]);
+                return await Task.FromResult(_mockResponses[request.RequestUri]);
             }
             else
             {
@@ -36,17 +39,5 @@ namespace NetCoreForce.Client.Tests
                 return await Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound) { RequestMessage = request });
             }
         }
-
-        // protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
-        // {
-        //     if (_MockResponses.ContainsKey(request.RequestUri))
-        //     {
-        //         return Task.FromResult(_MockResponses[request.RequestUri]);
-        //     }
-        //     else
-        //     {
-        //         return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound) { RequestMessage = request });
-        //     }
-        // }
     }
 }

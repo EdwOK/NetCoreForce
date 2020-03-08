@@ -1,8 +1,9 @@
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using NetCoreForce.Client;
 
-namespace NetCoreForce.Client
+namespace NetCoreForce.FunctionalTests
 {
     public class HttpClientFactory
     {

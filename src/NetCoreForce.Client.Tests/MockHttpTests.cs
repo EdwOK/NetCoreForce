@@ -26,7 +26,9 @@ namespace NetCoreForce.Client.Tests
 
             var httpClient = new HttpClient(mockHandler);
 
-            return new ForceClient(instanceUrl, apiVersion, "dummyToken", httpClient);
+            var forceClient = new ForceClient(httpClient)
+                .Initialize(instanceUrl, apiVersion, "dummyToken");
+            return forceClient;
         }
 
         [Fact]

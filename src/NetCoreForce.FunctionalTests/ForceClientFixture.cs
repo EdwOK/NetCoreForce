@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 using NetCoreForce.Client;
 using NetCoreForce.Client.Models;
@@ -38,17 +39,17 @@ namespace NetCoreForce.FunctionalTests
 
         public async Task<ForceClient> GetForceClient(string proxyUrl = null)
         {
-            System.Net.Http.HttpClient proxyClient = null;
+            HttpClient proxyClient = null;
 
             if (!string.IsNullOrEmpty(proxyUrl))
             {
-                proxyClient  = HttpClientFactory.CreateHttpClient(true, proxyUrl);
+                proxyClient = HttpClientFactory.CreateHttpClient(true, proxyUrl);
             }
 
-            var auth = new AuthenticationClient();
+            var auth = new AuthenticationClient(proxyClient);
             await auth.UsernamePasswordAsync(AuthInfo.ClientId, AuthInfo.ClientSecret,
                     AuthInfo.Username, AuthInfo.Password, AuthInfo.TokenRequestEndpoint);
-            var client = new ForceClient(auth.AccessInfo.InstanceUrl, auth.ApiVersion, auth.AccessInfo.AccessToken, proxyClient);
+            var client = new ForceClient(proxyClient).Initialize(auth.AccessInfo.InstanceUrl, auth.ApiVersion, auth.AccessInfo.AccessToken);
             return client;
         }
 

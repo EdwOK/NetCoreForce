@@ -30,7 +30,7 @@
     <!-- warning CS1701: Assuming assembly reference 'System.Runtime [...] 4.0/4.1 mismatch when enabling doc output-->
     <!-- <NoWarn>CS1591,CS1701</NoWarn> -->
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageOutputPath>$(SolutionDir)/packages</PackageOutputPath>
   </PropertyGroup>

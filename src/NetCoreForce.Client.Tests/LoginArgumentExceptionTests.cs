@@ -1,4 +1,5 @@
 using System;
+using System.Net.Http;
 using Xunit;
 
 namespace NetCoreForce.Client.Tests
@@ -10,24 +11,24 @@ namespace NetCoreForce.Client.Tests
         [Fact]
         public void MalformedTokenRequestEndpoint()
         {
-            AuthenticationClient auth = new AuthenticationClient();
+            AuthenticationClient auth = new AuthenticationClient(new HttpClient());
 
             FormatException ex = Assert.Throws<FormatException>(() =>
                 auth.UsernamePassword("ClientId", "ClientSecret", "username", "badpassword", "malformed_tokenRequestEndpoint")
             );
 
-            Assert.True(ex.Message.Contains("tokenRequestEndpointUrl"));
+            Assert.Contains("tokenRequestEndpointUrl", ex.Message);
         }
 
         [Fact]
         public void ForceClientAndAuthenticationClientThrowSameError()
         {
             //check that the ForceClient and AuthenticationClient both throw the same argument exception
-            AuthenticationClient auth = new AuthenticationClient();
+            AuthenticationClient auth = new AuthenticationClient(new HttpClient());
 
             ArgumentNullException acex = Assert.Throws<ArgumentNullException>(() =>
             {
-                var client = new ForceClient("ClientId", "ClientSecret", "username", "", DefaultTokenRequestEndpoint);
+                var client = new ForceClient(new HttpClient()).Initialize("ClientId", "ClientSecret", "username", "", DefaultTokenRequestEndpoint);
             });
 
             ArgumentNullException fcex = Assert.Throws<ArgumentNullException>(() =>
@@ -43,10 +44,10 @@ namespace NetCoreForce.Client.Tests
         {
             ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
             {
-                var client = new ForceClient(null, "ClientSecret", "username", "password", DefaultTokenRequestEndpoint);
+                var client = new ForceClient(new HttpClient()).Initialize(null, "ClientSecret", "username", "password", DefaultTokenRequestEndpoint);
             });
 
-            Assert.True(ex.Message.ToLower().Contains("clientid"));
+            Assert.Contains("clientid", ex.Message.ToLower());
         }
 
         [Fact]
@@ -54,10 +55,10 @@ namespace NetCoreForce.Client.Tests
         {
             ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
             {
-                var client = new ForceClient("ClientId", null, "username", "password", DefaultTokenRequestEndpoint);
+                var client = new ForceClient(new HttpClient()).Initialize("ClientId", null, "username", "password", DefaultTokenRequestEndpoint);
             });
 
-            Assert.True(ex.Message.ToLower().Contains("clientsecret"));
+            Assert.Contains("clientsecret", ex.Message.ToLower());
         }
 
         [Fact]
@@ -65,10 +66,10 @@ namespace NetCoreForce.Client.Tests
         {
             ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
             {
-                var client = new ForceClient("ClientId", "ClientSecret", null, "password", DefaultTokenRequestEndpoint);
+                var client = new ForceClient(new HttpClient()).Initialize("ClientId", "ClientSecret", null, "password", DefaultTokenRequestEndpoint);
             });
 
-            Assert.True(ex.Message.ToLower().Contains("username"));
+            Assert.Contains("username", ex.Message.ToLower());
         }
 
         [Fact]
@@ -76,12 +77,10 @@ namespace NetCoreForce.Client.Tests
         {
             ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
             {
-                var client = new ForceClient("ClientId", "ClientSecret", "username", null, DefaultTokenRequestEndpoint);
+                var client = new ForceClient(new HttpClient()).Initialize("ClientId", "ClientSecret", "username", null, DefaultTokenRequestEndpoint);
             });
 
-            Assert.True(ex.Message.ToLower().Contains("password"));
+            Assert.Contains("password", ex.Message.ToLower());
         }
-
-
     }
 }

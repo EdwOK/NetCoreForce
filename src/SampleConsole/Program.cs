@@ -6,6 +6,7 @@ using NetCoreForce.Client;
 using NetCoreForce.Client.Models;
 using NetCoreForce.Models;
 using System.Dynamic;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using Newtonsoft.Json;
@@ -31,7 +32,10 @@ namespace SampleConsole
         private static async Task RunTest()
         {
             AuthInfo authInfo = GetAuthInfo();
-            AuthenticationClient auth = new AuthenticationClient(authInfo.ApiVersion);
+            AuthenticationClient auth = new AuthenticationClient(new HttpClient())
+            {
+                ApiVersion = authInfo.ApiVersion
+            };
 
             try
             {
@@ -51,7 +55,7 @@ namespace SampleConsole
 
             try
             {
-                ForceClient client = new ForceClient(auth.AccessInfo.InstanceUrl, auth.ApiVersion, auth.AccessInfo.AccessToken);
+                ForceClient client = new ForceClient(new HttpClient()).Initialize(auth.AccessInfo.InstanceUrl, auth.ApiVersion, auth.AccessInfo.AccessToken);
 
                 List<SfContact> contacts = await client.Query<SfContact>("SELECT Id, Name, SystemModstamp, Account.Id, Account.Name, Account.SystemModstamp FROM Contact", false);
 

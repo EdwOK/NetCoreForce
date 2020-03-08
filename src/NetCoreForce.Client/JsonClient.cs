@@ -12,31 +12,13 @@ using NetCoreForce.Client.Models;
 
 namespace NetCoreForce.Client
 {
-    public class JsonClient : IDisposable
+    public class JsonClient
     {
         private const string JsonMimeType = "application/json";
-        // private const string GZipEncoding = "gzip";
-        // private const string DeflateEncoding = "deflate";
 
-        //best practice is to reuse HttpClient
-        //https://github.com/mspnp/performance-optimization/blob/master/ImproperInstantiation/docs/ImproperInstantiation.md
-        //By default, and the ideal case, is using the static readonly HttpClient.
-        //Alternatively, for testing and special cases, a class instance instance of an HttpClient can be used instead.
-        private static readonly HttpClient _SharedHttpClient;
-        
         private readonly HttpClient _httpClient;
         
         private readonly AuthenticationHeaderValue _authHeaderValue;
-
-        private HttpClient SharedHttpClient => _httpClient ?? _SharedHttpClient;
-
-        /// <summary>
-        /// JSON Client static constructor, initializes the default shared HttpClient instance.
-        /// </summary>
-        static JsonClient()
-        {
-            _SharedHttpClient = HttpClientFactory.CreateHttpClient();
-        }
 
         /// <summary>
         /// Intialize the JSON client.
@@ -111,14 +93,14 @@ namespace NetCoreForce.Client
         }
 
         /// <summary>
-        /// Get a http client reponse
+        /// Get a http client response
         /// </summary>
         /// <param name="request">HttpRequestMessage containing the request details</param>
         /// <param name="customHeaders">Custom headers, if any</param>
         /// <param name="deserializeResponse">Should the response be deserialized for successful (HTTP 2xx) requests. Default is true/yes.
         /// If false/no, this effectively ignores the content of any 2xx type response.
         /// Errors will still be deserialized.</param>
-        /// <typeparam name="T">Type used to deserialize the reponse content</typeparam>
+        /// <typeparam name="T">Type used to deserialize the response content</typeparam>
         /// <returns></returns>
         private async Task<T> GetResponse<T>(HttpRequestMessage request, Dictionary<string, string> customHeaders = null, bool deserializeResponse = true)
         {
@@ -133,7 +115,7 @@ namespace NetCoreForce.Client
             HttpResponseMessage responseMessage;
             try
             {
-                responseMessage = await SharedHttpClient.SendAsync(request).ConfigureAwait(false);
+                responseMessage = await _httpClient.SendAsync(request).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -142,7 +124,9 @@ namespace NetCoreForce.Client
                 {
                     errMsg += $" {ex.InnerException.Message}";
                 }
+#if DEBUG
                 Debug.WriteLine(errMsg);
+#endif
                 throw new ForceApiException(errMsg);
             }
 
@@ -260,17 +244,10 @@ namespace NetCoreForce.Client
                 }
             }
 
+#if DEBUG
             Debug.WriteLine($"{headerName} header not found in response");
+#endif
             return null;
-        }
-
-        /// <summary>
-        /// Dispose client - only disposes instance HttpClient, if any. Shared static HttpClient is left as-is.
-        /// </summary>
-        public void Dispose()
-        {
-            //only dispose instance member, if any
-            _httpClient?.Dispose();
         }
     }
 }
