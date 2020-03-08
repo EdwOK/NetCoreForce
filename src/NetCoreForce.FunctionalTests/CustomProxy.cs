@@ -1,7 +1,7 @@
 using System;
 using System.Net;
 
-namespace NetCoreForce.Client
+namespace NetCoreForce.FunctionalTests
 {
     /// <summary>
     /// Very basic implementation of IWebProxy
