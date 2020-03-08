@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace NetCoreForce.Client.Extensions
 {
-    internal static class CommonExtenions
+    internal static class CommonExtensions
     {
         /// <summary>
         /// Convert DateTimeOffset to a Salesforce-compatible string

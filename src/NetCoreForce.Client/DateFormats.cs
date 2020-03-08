@@ -7,7 +7,7 @@ namespace NetCoreForce.Client
     /// <summary>
     /// Salesforce date format strings
     /// </summary>
-    public static class DateFormats
+    internal static class DateFormats
     {
         private const string _FullFormat = "yyyy-MM-ddTHH:mm:sszzz";
         private const string _FullFormatZulu = "yyyy-MM-ddTHH:mm:ssZ";
