@@ -21,19 +21,15 @@ namespace NetCoreForce.Client
         private readonly AuthenticationHeaderValue _authHeaderValue;
 
         /// <summary>
-        /// Intialize the JSON client.
+        /// Initialize the JSON client.
         /// <para>By default, uses a shared static HttpClient instance for best performance.</para>
         /// </summary>
         /// <param name="accessToken">API Access token</param>
         /// <param name="httpClient">Optional custom HttpClient. Ideally this should be a shared static instance for best performance.</param>
-        public JsonClient(string accessToken, HttpClient httpClient = null)
+        public JsonClient(string accessToken, HttpClient httpClient)
         {
+            _httpClient = httpClient;
             _authHeaderValue = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            if (httpClient != null)
-            {
-                _httpClient = httpClient;
-            }
         }
 
         public async Task<T> HttpGetAsync<T>(Uri uri, Dictionary<string, string> customHeaders = null, bool deserializeResponse = true)
@@ -59,9 +55,9 @@ namespace NetCoreForce.Client
 
         public async Task<T> HttpPatchAsync<T>(object inputObject, Uri uri, Dictionary<string, string> customHeaders = null, bool deserializeResponse = true, bool serializeComplete = false)
         {
-            var json = serializeComplete ?
-                JsonSerializer.SerializeComplete(inputObject, false) :
-                JsonSerializer.SerializeForUpdate(inputObject);
+            var json = serializeComplete 
+                ? JsonSerializer.SerializeComplete(inputObject, false) 
+                : JsonSerializer.SerializeForUpdate(inputObject);
 
             var content = new StringContent(json, Encoding.UTF8, JsonMimeType);
 

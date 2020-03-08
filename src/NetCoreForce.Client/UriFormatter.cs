@@ -57,7 +57,7 @@ namespace NetCoreForce.Client
         }
 
         //split off full URL formatter and resource relative url formatters?
-        //batch/tree reqs may need relative url parsers
+        //batch/tree request may need relative url parsers
 
         /// <summary>
         /// Limits Resource

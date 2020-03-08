@@ -9,8 +9,6 @@ namespace NetCoreForce.Client
     {
         public List<ErrorResponse> Errors { get; set; }
 
-        // public string[] Fields { get; private set; }
-        // public string ErrorCode { get; private set; }
         public HttpStatusCode HttpStatusCode { get; private set; }
 
         /// <summary>

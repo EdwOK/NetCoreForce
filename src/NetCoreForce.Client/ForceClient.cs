@@ -12,9 +12,14 @@ namespace NetCoreForce.Client
 {
     public class ForceClient
     {
+        private readonly HttpClient _httpClient;
+
         public string ApiVersion { get; private set; }
+
         public string InstanceUrl { get; private set; }
+
         public string AccessToken { get; private set; }
+
         public string ClientName { get; set; }
 
         /// <summary>
@@ -22,8 +27,6 @@ namespace NetCoreForce.Client
         /// May not be available if the client was initialized with a pre-existing access token
         /// </summary>
         public AccessTokenResponse AccessInfo { get; set; }
-
-        private readonly HttpClient _httpClient;
 
         public ForceClient(HttpClient httpClient)
         {

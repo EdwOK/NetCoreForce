@@ -68,14 +68,5 @@ namespace NetCoreForce.Client
 
             return serializedJson;
         }
-
-        /// <summary>
-        /// Deserializes raw JSON into given type
-        /// </summary>
-        /// <param name="json">JSON object string</param>
-        public static T Deserialize<T>(string json)
-        {
-            return JsonConvert.DeserializeObject<T>(json);
-        }
     }
 }

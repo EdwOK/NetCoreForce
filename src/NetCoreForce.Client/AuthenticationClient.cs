@@ -11,7 +11,7 @@ namespace NetCoreForce.Client
 {
     public class AuthenticationClient
     {
-        private const string DefaultApiVersion = "v44.0";
+        private const string DefaultApiVersion = "latest";
         private const string UserAgent = "netcoreforce-client";
         private const string TokenRequestEndpointUrl = "https://login.salesforce.com/services/oauth2/token";
 

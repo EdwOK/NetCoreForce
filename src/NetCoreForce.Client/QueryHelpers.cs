@@ -16,7 +16,7 @@ using System.Text.Encodings.Web;
 
 namespace NetCoreForce.Client
 {
-    public static class QueryHelpers
+    internal static class QueryHelpers
     {
         /// <summary>
         /// Append the given query key and value to the URI.

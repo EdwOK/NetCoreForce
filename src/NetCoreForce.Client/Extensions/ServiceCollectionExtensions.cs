@@ -6,8 +6,16 @@ namespace NetCoreForce.Client.Extensions
     {
         public static IServiceCollection AddSalesforce(this IServiceCollection services)
         {
-            services.AddHttpClient<ForceClient>();
-            services.AddHttpClient<AuthenticationClient>();
+            services.AddHttpClient<ForceClient>(client =>
+            {
+                client.DefaultRequestHeaders.Add("X-PrettyPrint", "1");
+            });
+            
+            services.AddHttpClient<AuthenticationClient>(client =>
+            {
+                client.DefaultRequestHeaders.Add("X-PrettyPrint", "1");
+            });
+
             return services;
         }
     }
