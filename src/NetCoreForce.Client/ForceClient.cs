@@ -157,7 +157,7 @@ namespace NetCoreForce.Client
 
 #if DEBUG
                     Debug.WriteLine(
-                        $"Got query resuts, {qr.TotalSize} totalSize, {qr.Records.Count.ToString()} in this batch, final batch: {qr.Done.ToString()}");
+                        $"Got query results, {qr.TotalSize} totalSize, {qr.Records.Count.ToString()} in this batch, final batch: {qr.Done.ToString()}");
 #endif
 
                     results.AddRange(qr.Records);
@@ -169,7 +169,7 @@ namespace NetCoreForce.Client
                     if (!done && string.IsNullOrEmpty(nextRecordsUrl))
                     {
                         //Normally if query has remaining batches, NextRecordsUrl will have a value, and Done will be false.
-                        //In case of some unforseen error, flag the result as done if we're missing the NextRecordsUrl
+                        //In case of some unforeseen error, flag the result as done if we're missing the NextRecordsUrl
                         //In this situation we'll just get the previous set again and be stuck in a loop.
                         done = true;
                     }

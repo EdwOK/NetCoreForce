@@ -1,12 +1,13 @@
 using System;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace NetCoreForce.Client.Tests
 {
     public class LoginArgumentExceptionTests
     {
-        const string DefaultTokenRequestEndpoint = "https://login.salesforce.com/services/oauth2/token";
+        private const string DefaultTokenRequestEndpoint = "https://login.salesforce.com/services/oauth2/token";
 
         [Fact]
         public void MalformedTokenRequestEndpoint()
@@ -21,14 +22,14 @@ namespace NetCoreForce.Client.Tests
         }
 
         [Fact]
-        public void ForceClientAndAuthenticationClientThrowSameError()
+        public async Task ForceClientAndAuthenticationClientThrowSameError()
         {
             //check that the ForceClient and AuthenticationClient both throw the same argument exception
             AuthenticationClient auth = new AuthenticationClient(new HttpClient());
 
-            ArgumentNullException acex = Assert.Throws<ArgumentNullException>(() =>
+            ArgumentNullException acex = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
             {
-                var client = new ForceClient(new HttpClient()).Initialize("ClientId", "ClientSecret", "username", "", DefaultTokenRequestEndpoint);
+                await new ForceClient(new HttpClient()).Initialize("ClientId", "ClientSecret", "username", "", DefaultTokenRequestEndpoint);
             });
 
             ArgumentNullException fcex = Assert.Throws<ArgumentNullException>(() =>
@@ -40,44 +41,44 @@ namespace NetCoreForce.Client.Tests
         }
 
         [Fact]
-        public void EmptyClientIdArgumentNullException()
+        public async Task EmptyClientIdArgumentNullExceptionAsync()
         {
-            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
+            ArgumentNullException ex = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
             {
-                var client = new ForceClient(new HttpClient()).Initialize(null, "ClientSecret", "username", "password", DefaultTokenRequestEndpoint);
+                await new ForceClient(new HttpClient()).Initialize(null, "ClientSecret", "username", "password", DefaultTokenRequestEndpoint);
             });
 
             Assert.Contains("clientid", ex.Message.ToLower());
         }
 
         [Fact]
-        public void EmptyClientSecretArgumentNullException()
+        public async Task EmptyClientSecretArgumentNullException()
         {
-            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
+            ArgumentNullException ex = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
             {
-                var client = new ForceClient(new HttpClient()).Initialize("ClientId", null, "username", "password", DefaultTokenRequestEndpoint);
+                await new ForceClient(new HttpClient()).Initialize("ClientId", null, "username", "password", DefaultTokenRequestEndpoint);
             });
 
             Assert.Contains("clientsecret", ex.Message.ToLower());
         }
 
         [Fact]
-        public void EmptyUsernameArgumentNullException()
+        public async Task EmptyUsernameArgumentNullException()
         {
-            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
+            ArgumentNullException ex = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
             {
-                var client = new ForceClient(new HttpClient()).Initialize("ClientId", "ClientSecret", null, "password", DefaultTokenRequestEndpoint);
+                await new ForceClient(new HttpClient()).Initialize("ClientId", "ClientSecret", null, "password", DefaultTokenRequestEndpoint);
             });
 
             Assert.Contains("username", ex.Message.ToLower());
         }
 
         [Fact]
-        public void EmptyPasswordArgumentNullException()
+        public async Task EmptyPasswordArgumentNullException()
         {
-            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
+            ArgumentNullException ex = await Assert.ThrowsAsync<ArgumentNullException>(async () =>
             {
-                var client = new ForceClient(new HttpClient()).Initialize("ClientId", "ClientSecret", "username", null, DefaultTokenRequestEndpoint);
+                await new ForceClient(new HttpClient()).Initialize("ClientId", "ClientSecret", "username", null, DefaultTokenRequestEndpoint);
             });
 
             Assert.Contains("password", ex.Message.ToLower());
